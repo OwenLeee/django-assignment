@@ -1,9 +1,9 @@
 from django.db import IntegrityError, transaction
 from django.test import TestCase
 
-from catalog.models import Product
+from catalog.models import Product, Tag
 
-from .helpers import create_category, create_product
+from .helpers import create_category, create_product, create_tag
 
 
 class ProductTagTests(TestCase):
@@ -52,3 +52,94 @@ class ProductTagTests(TestCase):
             with transaction.atomic():
                 ProductTag.objects.create(product=product, tag=tag)
         self.assertEqual(product.tags.count(), 1)
+
+    def test_removing_tag_preserves_product_and_tags(self):
+        product = create_product()
+        tag_to_remove = create_tag(name="Tag to Remove")
+        tag_to_keep = create_tag(name="Tag to Keep")
+
+        product.tags.add(tag_to_remove, tag_to_keep)
+
+        # Verify that both tags are associated with the product before removal
+        self.assertEqual(product.tags.count(), 2)
+
+        product.tags.remove(tag_to_remove)
+
+        # Verify that the tag was removed and the other tag is still associated
+        self.assertEqual(product.tags.count(), 1)
+        self.assertIn(tag_to_keep, product.tags.all())
+
+        # Verify product, tag_to_remove, and tag_to_keep still exist in the database
+        self.assertTrue(Product.objects.filter(id=product.id).exists())
+        self.assertTrue(Tag.objects.filter(id=tag_to_remove.id).exists())
+        self.assertTrue(Tag.objects.filter(id=tag_to_keep.id).exists())
+
+    def test_deleting_product_cleans_relationships_and_preserves_tags(self):
+        category = create_category()
+        tag = create_tag()
+        product_to_delete = create_product(category=category)
+        product_to_delete.tags.add(tag)
+        product_to_keep = create_product(category=category)
+        product_to_keep.tags.add(tag)
+
+        ProductTag = Product.tags.through
+
+        product_to_delete_pk = product_to_delete.pk
+
+        product_to_delete.delete()
+
+        # Verify product_to_delete is removed from the database
+        self.assertFalse(Product.objects.filter(pk=product_to_delete_pk).exists())
+
+        # Verify product_to_delete and that tag associated with it is not in the association table
+        self.assertFalse(
+            ProductTag.objects.filter(
+                tag_id=tag.pk, product_id=product_to_delete_pk
+            ).exists()
+        )
+
+        # Verify product_to_keep and tag are still in the database and associated
+        self.assertTrue(Product.objects.filter(pk=product_to_keep.pk).exists())
+        self.assertTrue(Tag.objects.filter(pk=tag.pk).exists())
+        self.assertTrue(
+            ProductTag.objects.filter(
+                tag_id=tag.pk, product_id=product_to_keep.pk
+            ).exists()
+        )
+
+    def test_deleting_tag_cleans_relationships_and_preserves_products(self):
+        product = create_product()
+        tag_to_delete = create_tag(name="Tag to Delete")
+        tag_to_keep = create_tag(name="Tag to Keep")
+        product.tags.add(tag_to_delete)
+        product.tags.add(tag_to_keep)
+        ProductTag = Product.tags.through
+
+        # Verify that the product and tags are associated before deletion
+        self.assertEqual(product.tags.count(), 2)
+
+        tag_to_delete_pk = tag_to_delete.pk
+        tag_to_delete.delete()
+
+        # Verify that the tag_to_delete is removed from the database
+        self.assertFalse(Tag.objects.filter(pk=tag_to_delete_pk).exists())
+
+        # Verify that the tag_to_keep is kept in the database
+        self.assertTrue(Tag.objects.filter(pk=tag_to_keep.pk).exists())
+
+        # Verify that the product is still in the database
+        self.assertTrue(Product.objects.filter(pk=product.pk).exists())
+
+        # Verify that the tag_to_delete is no longer associated with the product
+        self.assertFalse(
+            ProductTag.objects.filter(
+                tag_id=tag_to_delete_pk, product_id=product.pk
+            ).exists()
+        )
+
+        # Verify that the tag_to_keep is still associated with the product
+        self.assertTrue(
+            ProductTag.objects.filter(
+                tag_id=tag_to_keep.pk, product_id=product.pk
+            ).exists()
+        )
