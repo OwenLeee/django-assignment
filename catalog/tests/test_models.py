@@ -134,3 +134,18 @@ class TagUniquenessTests(TestCase):
         with self.assertRaises(IntegrityError):
             with transaction.atomic():
                 Tag.objects.create(name="industrial")
+
+
+class TagSaveTests(TestCase):
+    def test_create_stores_trimmed_name(self):
+        tag = Tag.objects.create(name="  Industrial  ")
+        tag.refresh_from_db()
+
+        self.assertEqual(tag.name, "Industrial")
+
+    def test_save_rejects_whitespace_only_name(self):
+        tag = Tag(name="   ")
+
+        with self.assertRaises(ValidationError):
+            tag.save()
+        self.assertEqual(Tag.objects.count(), 0)
