@@ -28,6 +28,18 @@ jobs:
       - name: Install locked dependencies
         run: uv sync --locked --dev
 
+      - name: Install Node.js
+        uses: actions/setup-node@v7.0.0
+        with:
+          node-version: "26.7.0"
+          cache: npm
+
+      - name: Install locked frontend dependencies
+        run: npm ci
+
+      - name: Build CSS
+        run: npm run build:css
+
       - name: Django system checks
         run: uv run --locked python manage.py check
 

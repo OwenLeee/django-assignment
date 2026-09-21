@@ -1,3 +1,13 @@
+FROM node:26.7.0-slim AS frontend
+
+WORKDIR /app
+
+COPY package.json package-lock.json ./
+RUN npm ci
+
+COPY . .
+RUN npm run build:css
+
 FROM python:3.14.7-slim
 
 COPY --from=ghcr.io/astral-sh/uv:0.12.17 /uv /uvx /bin/
@@ -12,6 +22,7 @@ COPY pyproject.toml uv.lock ./
 RUN uv sync --locked --no-dev --no-install-project
 
 COPY . .
+COPY --from=frontend /app/static/css/app.css ./static/css/app.css
 
 ENV PATH="/app/.venv/bin:$PATH"
 
