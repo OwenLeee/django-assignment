@@ -137,3 +137,33 @@ class ProductDescriptionTests(SimpleTestCase):
             product.description,
             "400A panelboard for commercial power distribution\n, planned as a major  equipment purchase.",
         )
+
+
+class ProductDescriptionSaveTests(TestCase):
+    def test_create_stores_trimmed_description(self):
+        product = create_product(
+            description="  400A panelboard for commercial power distribution\n, planned as a major  equipment purchase.  "
+        )
+        product.refresh_from_db()
+
+        self.assertEqual(
+            product.description,
+            "400A panelboard for commercial power distribution\n, planned as a major  equipment purchase.",
+        )
+
+    def test_save_rejects_invalid_description(self):
+        descriptions = ["   ", "A" * 2001]
+        category = create_category()
+
+        for description in descriptions:
+            with self.subTest(description=description):
+                product = Product(
+                    name="Test Product",
+                    description=description,
+                    category=category,
+                )
+
+                with self.assertRaises(ValidationError) as context:
+                    product.save()
+                self.assertEqual(Product.objects.count(), 0)
+                self.assertIn("description", context.exception.message_dict)
