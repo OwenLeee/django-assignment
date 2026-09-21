@@ -69,7 +69,7 @@ class ProductNameTests(SimpleTestCase):
         self.assertIn("name", context.exception.message_dict)
 
 
-class ProductSaveTests(TestCase):
+class ProductNameSaveTests(TestCase):
     def test_create_stores_trimmed_name(self):
         product = create_product(name="  400A Panelboard  ")
         product.refresh_from_db()
