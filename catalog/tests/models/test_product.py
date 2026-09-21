@@ -47,6 +47,14 @@ class ProductCategoryRelationshipTests(TestCase):
         self.assertEqual(product_count_before, product_count_after)
         self.assertIn("category", context.exception.message_dict)
 
+    def test_products_can_share_the_same_name(self):
+        product1 = create_product(name="Shared Name", category=self.category)
+        product2 = create_product(name="Shared Name", category=self.category)
+
+        self.assertEqual(product1.name, product2.name)
+        self.assertNotEqual(product1.pk, product2.pk)
+        self.assertEqual(Product.objects.filter(name="Shared Name").count(), 2)
+
 
 class ProductNameTests(SimpleTestCase):
     def validate(self, product):
