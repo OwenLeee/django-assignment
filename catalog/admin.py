@@ -1,6 +1,7 @@
 from django import forms
 from django.contrib import admin
 from django.db import models
+from django.utils.html import format_html, format_html_join
 
 from .models import Category, Product, Tag
 
@@ -24,7 +25,7 @@ class ProductAdmin(admin.ModelAdmin):
     list_display = (
         "name",
         "description",
-        "category",
+        "display_category",
         "display_tags",
         "created_at",
         "updated_at",
@@ -49,9 +50,26 @@ class ProductAdmin(admin.ModelAdmin):
         models.ManyToManyField: {"widget": forms.CheckboxSelectMultiple}
     }
 
+    list_select_related = ("category",)
+
     @admin.display(description="Tags")
     def display_tags(self, obj):
-        return ", ".join(tag.name for tag in obj.tags.all())
+        return format_html_join(
+            " ",
+            '<span style="color: #006B75; background-color: #E6F3F4; '
+            "padding: 2px 8px; border-radius: 999px; display: inline-block; "
+            'margin: 2px 0; overflow-wrap: anywhere;">{}</span>',
+            ((tag.name,) for tag in obj.tags.all()),
+        )
+
+    @admin.display(description="Category", ordering="category")
+    def display_category(self, obj):
+        return format_html(
+            '<span style="color: #111111; background-color: #F2F2F2; '
+            "padding: 2px 8px; border-radius: 999px; display: inline-block; "
+            'margin: 2px 0; overflow-wrap: anywhere;">{}</span>',
+            obj.category,
+        )
 
     # Overriding get_queryset: Solving the N+1 query problem by prefetching related tags for products in the admin list view
     def get_queryset(self, request):
