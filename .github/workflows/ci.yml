@@ -1,0 +1,50 @@
+name: CI
+
+on:
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7.0.1
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v9.0.0
+        with:
+          version: "0.12.17"
+
+      - name: Install Python
+        run: uv python install
+
+      - name: Install locked dependencies
+        run: uv sync --locked --dev
+
+      - name: Django system checks
+        run: uv run --locked python manage.py check
+
+      - name: Check for missing migrations
+        run: uv run --locked python manage.py makemigrations --check --dry-run
+
+      - name: Run tests
+        run: uv run --locked python manage.py test
+
+      - name: Ruff lint
+        run: uv run --locked ruff check .
+
+      - name: Ruff format
+        run: uv run --locked ruff format --check .
+
+      - name: Validate Compose configuration
+        run: docker compose config --quiet
+
+      - name: Build Docker image
+        run: docker build -t django-assignment:ci .
