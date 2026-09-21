@@ -2,7 +2,7 @@ from django.core.exceptions import ValidationError
 from django.db import IntegrityError, transaction
 from django.test import SimpleTestCase, TestCase
 
-from catalog.models import Category
+from catalog.models import Category, Tag
 
 
 class CategoryNameTests(SimpleTestCase):
@@ -76,3 +76,36 @@ class CategorySaveTests(TestCase):
         with self.assertRaises(ValidationError):
             category.save()
         self.assertEqual(Category.objects.count(), 0)
+
+
+class TagNameTests(SimpleTestCase):
+    def validate(self, tag):
+        tag.full_clean(
+            validate_unique=False,
+            validate_constraints=False,
+        )
+
+    def test_name_is_trimmed_and_case_is_preserved(self):
+        tag = Tag(name="  Industrial  ")
+
+        self.validate(tag)
+        self.assertEqual(tag.name, "Industrial")
+
+    def test_whitespace_only_name_is_rejected(self):
+        tag = Tag(name="   ")
+
+        with self.assertRaises(ValidationError) as context:
+            self.validate(tag)
+        self.assertIn("name", context.exception.message_dict)
+
+    def test_name_length_limit_applies_after_trimming(self):
+        tag = Tag(name=f"  {'A' * 100}  ")
+
+        self.validate(tag)
+        self.assertEqual(tag.name, "A" * 100)
+
+        tag.name = "A" * 101
+
+        with self.assertRaises(ValidationError) as context:
+            self.validate(tag)
+        self.assertIn("name", context.exception.message_dict)
