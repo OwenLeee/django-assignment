@@ -26,3 +26,6 @@ Thumbs.db
 
 # Generated CSS
 /static/css/app.css
+
+# draw.io automatic backups
+.$*.drawio.bkp
