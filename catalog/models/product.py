@@ -17,6 +17,9 @@ class Product(models.Model):
         "Tag", related_name="products", blank=True
     )  # Allowing products to have no or multiple tags and tags to be associated with multiple products
 
+    class Meta:
+        ordering = ["name", "id"]
+
     def clean_fields(self, exclude=None):
         if (exclude is None or "name" not in exclude) and isinstance(self.name, str):
             self.name = self.name.strip()
