@@ -61,3 +61,18 @@ class CategoryUniquenessTests(TestCase):
         with self.assertRaises(IntegrityError):
             with transaction.atomic():
                 Category.objects.create(name="industrial")
+
+
+class CategorySaveTests(TestCase):
+    def test_create_stores_trimmed_name(self):
+        category = Category.objects.create(name="  Industrial  ")
+        category.refresh_from_db()
+
+        self.assertEqual(category.name, "Industrial")
+
+    def test_save_rejects_whitespace_only_name(self):
+        category = Category(name="   ")
+
+        with self.assertRaises(ValidationError):
+            category.save()
+        self.assertEqual(Category.objects.count(), 0)
