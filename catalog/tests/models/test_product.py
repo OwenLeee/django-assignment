@@ -67,3 +67,20 @@ class ProductNameTests(SimpleTestCase):
         with self.assertRaises(ValidationError) as context:
             self.validate(product)
         self.assertIn("name", context.exception.message_dict)
+
+
+class ProductSaveTests(TestCase):
+    def test_create_stores_trimmed_name(self):
+        product = create_product(name="  400A Panelboard  ")
+        product.refresh_from_db()
+
+        self.assertEqual(product.name, "400A Panelboard")
+
+    def test_save_rejects_whitespace_only_name(self):
+        product = Product(
+            name="   ", description="Test description", category=create_category()
+        )
+
+        with self.assertRaises(ValidationError):
+            product.save()
+        self.assertEqual(Product.objects.count(), 0)
