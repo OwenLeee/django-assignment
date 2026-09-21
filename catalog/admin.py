@@ -1,4 +1,6 @@
+from django import forms
 from django.contrib import admin
+from django.db import models
 
 from .models import Category, Product, Tag
 
@@ -33,6 +35,19 @@ class ProductAdmin(admin.ModelAdmin):
     )
     list_filter = ("category", "tags")
     readonly_fields = ("created_at", "updated_at")
+
+    fieldsets = (
+        (
+            "Product Information",
+            {"fields": ("name", "description")},
+        ),
+        ("Classification", {"fields": ("category", "tags")}),
+        ("Timestamps", {"fields": ("created_at", "updated_at")}),
+    )
+
+    formfield_overrides = {
+        models.ManyToManyField: {"widget": forms.CheckboxSelectMultiple}
+    }
 
     @admin.display(description="Tags")
     def display_tags(self, obj):
