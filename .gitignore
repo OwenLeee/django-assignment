@@ -1,0 +1,25 @@
+# Python
+.venv/
+__pycache__/
+*.py[cod]
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Local database
+*.sqlite3
+*.sqlite3-journal
+*.sqlite3-wal
+*.sqlite3-shm
+
+# Local secrets
+.env
+.env.*
+!.env.example
+
+# Frontend dependencies
+node_modules/
+
+# OS files
+.DS_Store
+Thumbs.db
