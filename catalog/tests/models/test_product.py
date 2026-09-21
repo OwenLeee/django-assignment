@@ -84,3 +84,56 @@ class ProductNameSaveTests(TestCase):
         with self.assertRaises(ValidationError):
             product.save()
         self.assertEqual(Product.objects.count(), 0)
+
+
+class ProductDescriptionTests(SimpleTestCase):
+    def validate(self, product):
+        product.full_clean(
+            validate_unique=False,
+            validate_constraints=False,
+            exclude=["name", "category"],
+        )
+
+    def test_description_is_trimmed_and_case_is_preserved(self):
+        product = Product(
+            description="  400A panelboard for commercial power distribution  ",
+        )
+
+        self.validate(product)
+        self.assertEqual(
+            product.description, "400A panelboard for commercial power distribution"
+        )
+
+    def test_whitespace_only_description_is_rejected(self):
+        test_cases = ["", "    ", "\n\t"]
+
+        for test_case in test_cases:
+            with self.subTest(description=test_case):
+                product = Product(description=test_case)
+
+                with self.assertRaises(ValidationError) as context:
+                    self.validate(product)
+                self.assertIn("description", context.exception.message_dict)
+
+    def test_description_length_limit_applies_after_trimming(self):
+        product = Product(description=f"  {'A' * 2000}  ")
+
+        self.validate(product)
+        self.assertEqual(product.description, "A" * 2000)
+
+        product.description = "A" * 2001
+
+        with self.assertRaises(ValidationError) as context:
+            self.validate(product)
+        self.assertIn("description", context.exception.message_dict)
+
+    def test_description_preserves_internal_whitespace(self):
+        product = Product(
+            description="  400A panelboard for commercial power distribution\n, planned as a major  equipment purchase.  "
+        )
+
+        self.validate(product)
+        self.assertEqual(
+            product.description,
+            "400A panelboard for commercial power distribution\n, planned as a major  equipment purchase.",
+        )

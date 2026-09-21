@@ -1,9 +1,12 @@
+from django.core.validators import MaxLengthValidator
 from django.db import models
 
 
 class Product(models.Model):
     name = models.CharField(max_length=100)
-    description = models.TextField()
+    description = models.TextField(
+        max_length=2000, validators=[MaxLengthValidator(2000)]
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     category = models.ForeignKey(
@@ -13,6 +16,12 @@ class Product(models.Model):
     def clean_fields(self, exclude=None):
         if (exclude is None or "name" not in exclude) and isinstance(self.name, str):
             self.name = self.name.strip()
+
+        if (exclude is None or "description" not in exclude) and isinstance(
+            self.description, str
+        ):
+            self.description = self.description.strip()
+
         super().clean_fields(exclude=exclude)
 
     def save(self, **kwargs):
