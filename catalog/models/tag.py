@@ -1,4 +1,5 @@
 from django.db import models
+from django.db.models.functions import Lower
 
 
 class Tag(models.Model):
@@ -9,6 +10,13 @@ class Tag(models.Model):
     class Meta:
         ordering = ["name", "id"]
         verbose_name_plural = "tags"
+        constraints = [
+            models.UniqueConstraint(
+                Lower("name"),
+                name="catalog_tag_name_ci_unique",
+                violation_error_message="A tag with this name already exists.",
+            ),
+        ]
 
     def clean_fields(self, exclude=None):
         if (exclude is None or "name" not in exclude) and isinstance(self.name, str):

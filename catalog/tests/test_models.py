@@ -109,3 +109,28 @@ class TagNameTests(SimpleTestCase):
         with self.assertRaises(ValidationError) as context:
             self.validate(tag)
         self.assertIn("name", context.exception.message_dict)
+
+
+class TagUniquenessTests(TestCase):
+    def test_duplicate_name_is_rejected_ignoring_case_and_spaces(self):
+        Tag.objects.create(name="Industrial")
+        duplicate = Tag(name="  industrial  ")
+
+        with self.assertRaises(ValidationError):
+            duplicate.full_clean()
+
+    def test_existing_tag_can_change_its_own_capitalization(self):
+        tag = Tag.objects.create(name="Industrial")
+        tag.name = "INDUSTRIAL"
+        tag.full_clean()
+        tag.save()
+        tag.refresh_from_db()
+
+        self.assertEqual(tag.name, "INDUSTRIAL")
+
+    def test_database_rejects_case_insensitive_duplicate(self):
+        Tag.objects.create(name="Industrial")
+
+        with self.assertRaises(IntegrityError):
+            with transaction.atomic():
+                Tag.objects.create(name="industrial")
