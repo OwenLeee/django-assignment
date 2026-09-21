@@ -32,6 +32,21 @@ class ProductCategoryRelationshipTests(TestCase):
         # 2. Ensure the product still exists after the failed deletion attempt
         self.assertTrue(Product.objects.filter(id=self.product.id).exists())
 
+    def test_product_cannot_be_created_without_category(self):
+        product = Product(
+            name="400A Panelboard",
+            description="400A panelboard for commercial power distribution",
+            category=None,
+        )
+        product_count_before = Product.objects.count()
+
+        with self.assertRaises(ValidationError) as context:
+            product.save()
+
+        product_count_after = Product.objects.count()
+        self.assertEqual(product_count_before, product_count_after)
+        self.assertIn("category", context.exception.message_dict)
+
 
 class ProductNameTests(SimpleTestCase):
     def validate(self, product):
