@@ -2,7 +2,7 @@ from django.http import QueryDict
 from django.test import SimpleTestCase, TestCase
 
 from catalog.search.forms import ProductSearchForm
-from catalog.tests.models.helpers import create_category
+from catalog.tests.models.helpers import create_category, create_tag
 
 
 class KeywordFieldTests(SimpleTestCase):
@@ -121,3 +121,117 @@ class CategoryFieldTests(TestCase):
                 self.assertFalse(form.is_valid())
                 self.assertIn("category", form.errors)
                 self.assertIn("Select only one category.", form.errors["category"])
+
+
+class SingleValueParameterTests(SimpleTestCase):
+    def test_repeated_keyword_is_rejected(self):
+        cases = ["q=wire&q=wire", "q=wire&q=conduit"]
+
+        for query in cases:
+            with self.subTest(query=query):
+                form = ProductSearchForm(data=QueryDict(query))
+
+                self.assertFalse(form.is_valid())
+                self.assertIn("q", form.errors)
+                self.assertIn("Enter only one search query.", form.errors["q"])
+
+    def test_repeated_tag_mode_is_rejected(self):
+        cases = ["tag_mode=all&tag_mode=all", "tag_mode=all&tag_mode=any"]
+
+        for query in cases:
+            with self.subTest(query=query):
+                form = ProductSearchForm(data=QueryDict(query))
+
+                self.assertFalse(form.is_valid())
+                self.assertIn("tag_mode", form.errors)
+                self.assertIn(
+                    "Select only one tag matching mode.", form.errors["tag_mode"]
+                )
+
+    def test_repeated_page_is_rejected(self):
+        cases = ["page=1&page=1", "page=1&page=2"]
+
+        for query in cases:
+            with self.subTest(query=query):
+                form = ProductSearchForm(data=QueryDict(query))
+
+                self.assertFalse(form.is_valid())
+                self.assertIn("Specify only one page.", form.non_field_errors())
+
+
+class TagModeFieldTests(SimpleTestCase):
+    def test_missing_or_empty_tag_mode_defaults_to_all(self):
+        cases = ["", "tag_mode="]
+
+        for query in cases:
+            with self.subTest(query=query):
+                form = ProductSearchForm(data=QueryDict(query))
+
+                self.assertTrue(form.is_valid(), form.errors)
+                self.assertEqual(form.cleaned_data["tag_mode"], "all")
+
+    def test_valid_tag_mode_is_retained_without_tags(self):
+        cases = ["all", "any"]
+
+        for mode in cases:
+            with self.subTest(mode=mode):
+                form = ProductSearchForm(data=QueryDict(f"tag_mode={mode}"))
+
+                self.assertTrue(form.is_valid(), form.errors)
+                self.assertEqual(form.cleaned_data["tag_mode"], mode)
+
+    def test_invalid_tag_mode_is_rejected_without_tags(self):
+        form = ProductSearchForm(data=QueryDict("tag_mode=banana"))
+
+        self.assertFalse(form.is_valid())
+        self.assertIn("tag_mode", form.errors)
+
+
+class TagFieldTests(TestCase):
+    def test_valid_tags_return_selected_tags(self):
+        tag1 = create_tag(name="Tag 1")
+        tag2 = create_tag(name="Tag 2")
+
+        data = QueryDict(f"tag={tag1.pk}&tag={tag2.pk}")
+        form = ProductSearchForm(data=data)
+
+        self.assertTrue(form.is_valid(), form.errors)
+        self.assertCountEqual(form.cleaned_data["tag"], [tag1, tag2])
+
+    def test_empty_tags_are_acceptable(self):
+        data = QueryDict()
+        form = ProductSearchForm(data=data)
+
+        self.assertTrue(form.is_valid(), form.errors)
+        self.assertCountEqual(form.cleaned_data["tag"], [])
+
+    def test_repeated_tag_ids_are_deduplicated(self):
+        tag1 = create_tag(name="Tag 1")
+
+        data = QueryDict(f"tag={tag1.pk}&tag={tag1.pk}")
+        form = ProductSearchForm(data=data)
+
+        self.assertTrue(form.is_valid(), form.errors)
+        self.assertCountEqual(form.cleaned_data["tag"], [tag1])
+
+    def test_malformed_tag_is_rejected(self):
+        valid_tag = create_tag(name="Valid tag")
+        data = QueryDict(f"tag={valid_tag.pk}&tag=abc")
+        form = ProductSearchForm(data=data)
+
+        self.assertFalse(form.is_valid())
+        self.assertIn("tag", form.errors)
+        self.assertIn("Invalid tag selection.", form.errors["tag"])
+
+    def test_unavailable_tag_is_rejected(self):
+        valid_tag = create_tag(name="Valid tag")
+        deleted_tag = create_tag(name="Deleted tag")
+        unavailable_id = deleted_tag.pk
+        deleted_tag.delete()
+
+        data = QueryDict(f"tag={valid_tag.pk}&tag={unavailable_id}")
+        form = ProductSearchForm(data=data)
+
+        self.assertFalse(form.is_valid())
+        self.assertIn("tag", form.errors)
+        self.assertIn("The selected tag is no longer available.", form.errors["tag"])
