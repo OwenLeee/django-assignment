@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+
+{% block title %} Search Products | Material Catalog {% endblock %}
+
+{% block content %}
+
+<header>
+  <p>Material catalog</p>
+  <h1>Find materials</h1>
+  <p>Search descriptions and narrow results by category and tags.</p>
+</header>
+
+<div class="catalog-layout">
+  {# Search Bar #}
+  <div class="catalog-sidebar">
+    <h2>Search filters</h2>
+    <form method="get" action="{% url 'catalog:product_list' %}">
+      {{ form.non_field_errors }}
+      <div>
+        <label for="{{ form.q.id_for_label }}">Search descriptions</label>
+        {{ form.q }} {{ form.q.errors }}
+      </div>
+      <div>
+        <label for="{{ form.category.id_for_label }}">Category</label>
+        {{ form.category }} {{ form.category.errors }}
+      </div>
+      <div>
+        <fieldset>
+          <legend>Tags</legend>
+            {{ form.tag }} {{ form.tag.errors }}
+        </fieldset>
+        <fieldset>
+          <legend>Tag matching</legend>
+            {{ form.tag_mode }} {{ form.tag_mode.errors }}
+        </fieldset>
+      </div>
+      <button type="submit">Search</button>
+      <a href="{% url 'catalog:product_list' %}">Clear filters</a>
+    </form>
+  </div>
+
+  {# Listing View #}
+  <div class="catalog-results">
+    {% if form.errors %}
+    <p>Please correct the filter errors to search for products.</p>
+    {% else %}
+    <div class="catalog-summary">
+      <h2>
+        {{ page_obj.paginator.count }} product{{ page_obj.paginator.count|pluralize }} found
+      </h2>
+      {% if page_obj.paginator.count %}
+      <p>Showing {{ page_obj.start_index }}-{{ page_obj.end_index }}</p>
+      {% endif %}
+    </div>
+    <div class="product-list">
+      {% for product in page_obj %}
+      <div class="product-box">
+        <h3>{{ product.name }}</h3>
+        <p>{{ product.description|linebreaksbr }}</p>
+        <div>
+          <p>Category: {{ product.category.name }}</p>
+          <h4>Tags</h4>
+          <ul>
+            {% for tag in product.tags.all %}
+            <li>{{ tag.name }}</li>
+            {% empty %}
+            <li>No tags</li>
+            {% endfor %}
+          </ul>
+        </div>
+      </div>
+      {% empty %}
+      <div>
+        <p>No products match your search.</p>
+        <p>Try changing your keywords or removing filters.</p>
+      </div>
+      {% endfor %}
+    </div>
+
+    {# Pagination #}
+    {% if page_obj.has_other_pages %}
+    <nav aria-label="Pagination">
+      {% if page_obj.has_previous %}
+      <a rel="prev" href="{% querystring page=page_obj.previous_page_number %}">
+        Previous
+      </a>
+      {% else %}
+      <span>Previous</span>
+      {% endif %}
+      <p>Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</p>
+      {% if page_obj.has_next %}
+      <a rel="next" href="{% querystring page=page_obj.next_page_number %}">
+        Next
+      </a>
+      {% else %}
+      <span>Next</span>
+      {% endif %}
+    </nav>
+    {% endif %}
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
