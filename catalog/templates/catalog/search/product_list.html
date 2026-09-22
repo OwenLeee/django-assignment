@@ -4,8 +4,7 @@
 
 {% block content %}
 
-<header>
-  <p>Material catalog</p>
+<header class="catalog-header">
   <h1>Find materials</h1>
   <p>Search descriptions and narrow results by category and tags.</p>
 </header>
@@ -14,7 +13,7 @@
   {# Search Bar #}
   <div class="catalog-sidebar">
     <h2>Search filters</h2>
-    <form method="get" action="{% url 'catalog:product_list' %}">
+    <form class="catalog-filters" method="get" action="{% url 'catalog:product_list' %}">
       {{ form.non_field_errors }}
       <div>
         <label for="{{ form.q.id_for_label }}">Search descriptions</label>
@@ -34,15 +33,17 @@
             {{ form.tag_mode }} {{ form.tag_mode.errors }}
         </fieldset>
       </div>
-      <button type="submit">Search</button>
-      <a href="{% url 'catalog:product_list' %}">Clear filters</a>
+      <div class="filter-actions">
+        <button type="submit">Search</button>
+        <a href="{% url 'catalog:product_list' %}">Clear filters</a>
+      </div>
     </form>
   </div>
 
   {# Listing View #}
   <div class="catalog-results">
     {% if form.errors %}
-    <p>Please correct the filter errors to search for products.</p>
+    <p class="catalog-error">Please correct the filter errors to search for products.</p>
     {% else %}
     <div class="catalog-summary">
       <h2>
@@ -56,21 +57,21 @@
       {% for product in page_obj %}
       <div class="product-box">
         <h3>{{ product.name }}</h3>
-        <p>{{ product.description|linebreaksbr }}</p>
-        <div>
+        <p class="product-description">{{ product.description|linebreaksbr }}</p>
+        <div class="product-metadata">
           <p>Category: {{ product.category.name }}</p>
           <h4>Tags</h4>
-          <ul>
+          <ul class="product-tags">
             {% for tag in product.tags.all %}
             <li>{{ tag.name }}</li>
             {% empty %}
-            <li>No tags</li>
+            <li class="no-tags">No tags</li>
             {% endfor %}
           </ul>
         </div>
       </div>
       {% empty %}
-      <div>
+      <div class="catalog-empty">
         <p>No products match your search.</p>
         <p>Try changing your keywords or removing filters.</p>
       </div>
@@ -79,7 +80,7 @@
 
     {# Pagination #}
     {% if page_obj.has_other_pages %}
-    <nav aria-label="Pagination">
+    <nav class="catalog-pagination" aria-label="Pagination">
       {% if page_obj.has_previous %}
       <a rel="prev" href="{% querystring page=page_obj.previous_page_number %}">
         Previous
