@@ -3,6 +3,12 @@ from django import forms
 from catalog.models import Category, Tag
 
 
+def is_positive_ascii_id(value):
+    # Accept positive IDs written with ASCII digits, including leading zeros.
+    # Examples: "1" and "001" are valid; "0", "000", "+1", and " 1 " are invalid.
+    return value.isascii() and value.isdigit() and value.lstrip("0") != ""
+
+
 class CategoryChoiceField(forms.ModelChoiceField):
     """Distinguish malformed category IDs from unavailable categories.
 
@@ -17,12 +23,23 @@ class CategoryChoiceField(forms.ModelChoiceField):
         if value is None or value == "":
             return super().to_python(value)
 
-        # Accept positive IDs written with ASCII digits, including leading zeros.
-        # Examples: "1" and "001" are valid; "0", "000", "+1", and " 1 " are invalid.
-        if value.isascii() and value.isdigit() and value.lstrip("0") != "":
+        if is_positive_ascii_id(value):
             return super().to_python(value)
 
         raise forms.ValidationError("Invalid category selection.")
+
+
+class TagMultipleChoiceField(forms.ModelMultipleChoiceField):
+    def clean(self, value):
+        if not value:
+            return super().clean(value)
+        normalized_values = []
+        for raw_id in value:
+            if is_positive_ascii_id(raw_id):
+                normalized_values.append(str(int(raw_id)))
+            else:
+                raise forms.ValidationError("Invalid tag selection.")
+        return super().clean(normalized_values)
 
 
 class ProductSearchForm(forms.Form):
@@ -34,9 +51,10 @@ class ProductSearchForm(forms.Form):
             "invalid_choice": "The selected category is no longer available.",
         },
     )
-    tag = forms.ModelMultipleChoiceField(
+    tag = TagMultipleChoiceField(
         required=False,
         queryset=Tag.objects.all(),
+        widget=forms.CheckboxSelectMultiple,
         error_messages={
             "invalid_pk_value": "Invalid tag selection.",
             "invalid_choice": "The selected tag is no longer available.",
@@ -46,6 +64,7 @@ class ProductSearchForm(forms.Form):
     tag_mode = forms.ChoiceField(
         required=False,
         initial="all",
+        widget=forms.RadioSelect,
         choices=[("all", "Match all selected tags"), ("any", "Match any selected tag")],
     )
 
