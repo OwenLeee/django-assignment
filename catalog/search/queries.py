@@ -18,4 +18,4 @@ def search_products(q="", category=None, tags=None, tag_mode="all"):
                 for tag in tags:
                     product_queryset = product_queryset.filter(tags=tag)
 
-    return product_queryset
+    return product_queryset.select_related("category").prefetch_related("tags")
