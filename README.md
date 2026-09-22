@@ -1,300 +1,140 @@
-# Django Assignment
+# Material Catalog
 
-## Before you start
+A Django catalog for searching electrical materials by description, category and tags.
 
-Choose one route:
+## Get the code
 
-- **Local development:** install uv for Python dependencies and Node/npm for the Tailwind CSS build.
-- **Docker review:** install and start Docker with Compose; Python and uv are provided inside the image.
-
-Both routes open the app at http://127.0.0.1:8000/admin/. Run only one server on
-port 8000 at a time. Catalog models, native admin management and a demo fixture
-are available. The public product search page is not implemented yet.
-
-### Get the project (first time only)
-
-Install [Git](https://git-scm.com/downloads) if needed, then run:
+Requires [Git](https://git-scm.com/downloads).
 
 ```sh
 git clone https://github.com/OwenLeee/django-assignment.git
 cd django-assignment
 ```
 
-All commands below run from this repository directory. In a new terminal, return
-to your checkout with `cd` before running them. The common commands work in macOS
-Terminal and Windows PowerShell; platform-specific installation steps are below.
+Choose Docker or local setup below. Keep port **8000** available.
 
-## Local development
+## Run with Docker
 
-### First-time setup
-
-Install **uv 0.12.17**, the version used by CI and Docker. If it is already
-installed, check `uv --version` first.
-
-macOS Terminal:
+Requires a running [Docker engine with Compose](https://docs.docker.com/get-started/get-docker/).
+Docker builds the Python environment and CSS; no host Python or Node installation is needed.
 
 ```sh
-curl -LsSf https://astral.sh/uv/0.12.17/install.sh | sh
+docker compose build
+docker compose run --rm web python manage.py migrate
+docker compose run --rm web python manage.py loaddata catalog/demo_catalog.json
+docker compose up -d
 ```
 
-Windows PowerShell:
+Open **http://127.0.0.1:8000/products/**. Expected: **20 products**, 10 on the first page.
+No login is required for search.
 
-```powershell
-powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/0.12.17/install.ps1 | iex"
-```
-
-These are the [official uv installer commands](https://docs.astral.sh/uv/getting-started/installation/).
-Reopen your terminal after installation so it can find `uv`, then return to the
-repository directory. You do not need to install Python separately.
-
-Install [Node.js 26.7.0](https://nodejs.org/en/download/archive/v26.7.0), matching
-the Docker frontend build stage. Its distribution includes npm 11.19.0. On macOS,
-use the `.pkg` installer; on Windows, use the `.msi` installer for your machine's
-architecture. If Node is already managed by a version manager, select 26.7.0 there.
-Reopen the terminal after installation and check `node --version` and `npm --version`.
-On Windows PowerShell, if an execution-policy error blocks `npm.ps1`, use `npm.cmd`
-in place of `npm` in the commands below.
+To edit data in [Django admin](http://127.0.0.1:8000/admin/), create your own account:
 
 ```sh
-uv --version
+docker compose run --rm web python manage.py createsuperuser
+```
+
+Stop: `docker compose down`. Restart: `docker compose up -d`.
+Rebuild after source changes: `docker compose up -d --build`.
+If startup fails: `docker compose logs --tail=80 web`.
+
+SQLite persists in a named volume. **`docker compose down -v` deletes its data.**
+This is a local-review setup using Django's development server and `DEBUG=True`.
+
+## Run locally
+
+Requires [uv 0.12.17](https://docs.astral.sh/uv/getting-started/installation/)
+and [Node.js 26.7.0](https://nodejs.org/en/download/archive/v26.7.0).
+From the cloned repository:
+
+```sh
 uv python install
 uv sync --locked --dev
 npm ci
 npm run build:css
 uv run --locked python manage.py migrate
 uv run --locked python manage.py loaddata catalog/demo_catalog.json
-uv run --locked python manage.py createsuperuser
 uv run --locked python manage.py runserver
 ```
 
-Follow the prompts to create your own admin username and password. Password input
-is not displayed in the terminal. Log in at http://127.0.0.1:8000/admin/.
-
-Python 3.14.7 is pinned in `.python-version`; dependencies are locked in `uv.lock`.
-The local database is `db.sqlite3` in the repository directory.
-
-The `loaddata` step loads the sample catalog described under [Demo data](#demo-data).
-Skip it if you want an empty catalog; create your admin account separately either way.
-
-### Start again next time
-
-```sh
-uv run --locked python manage.py runserver
-```
-
-Stop with **Ctrl+C**. Your database and admin account remain available; you do not
-need to repeat installation or `createsuperuser` each time.
-
-When editing templates or CSS, open a second terminal in the repository and run:
-
-```sh
-npm run watch:css
-```
-
-Keep it running alongside Django to rebuild CSS as source files change. Refresh
-the browser to see the changes; stop the watcher with Ctrl+C. For a one-off build,
-use `npm run build:css`. An unchanged checkout with existing compiled CSS only needs
-the Django server; if `static/css/app.css` is missing, rebuild it first.
-
-### After pulling project updates
-
-Stop the server, update your checkout, then sync dependencies and apply any new
-migrations before restarting:
-
-```sh
-git pull --ff-only
-uv python install
-uv sync --locked --dev
-npm ci
-npm run build:css
-uv run --locked python manage.py migrate
-uv run --locked python manage.py runserver
-```
-
-### VS Code on macOS and Windows
-
-Open the repository folder and install the recommended Python and Ruff extensions.
-Run **Python: Select Interpreter** and select this project's environment:
-
-- macOS: `.venv/bin/python`
-- Windows: `.venv\Scripts\python.exe`
-
-The committed VS Code settings enable Ruff formatting on save. Terminal commands
-use `uv run`, so manually activating `.venv` is unnecessary on either platform.
-
-## Docker
-
-### First-time setup
-
-Install Docker Desktop for your platform, following its prerequisites:
-
-- [macOS](https://docs.docker.com/desktop/setup/install/mac-install/): choose the
-  Apple silicon or Intel installer for your Mac. An existing OrbStack installation
-  with Docker/Compose support can also run this project.
-- [Windows](https://docs.docker.com/desktop/setup/install/windows-install/): follow
-  the WSL 2 backend setup and use **Linux containers** for this image.
-
-Start Docker Desktop (or OrbStack on macOS), wait for its engine to be ready, then
-verify it from your terminal:
-
-```sh
-docker info
-docker compose version
-```
-
-Python, uv and Node are not required on the host for the current Docker setup.
-The Dockerfile uses a Node build stage to run `npm ci` and `npm run build:css`,
-then copies the resulting CSS into the Python image. Only the Django web service
-runs; there is no separate frontend service or Node server.
-Stop any local Django server using port 8000, then run:
-
-```sh
-docker compose build
-docker compose run --rm web python manage.py migrate
-docker compose run --rm web python manage.py loaddata catalog/demo_catalog.json
-docker compose run --rm web python manage.py createsuperuser
-docker compose up -d
-```
-
-Create your own admin account at the prompt, then log in at
-http://127.0.0.1:8000/admin/. The same Compose commands work on macOS and Windows
-PowerShell. This setup uses Django's development server for local review.
-
-### Start again next time
-
-Start your Docker engine, then run:
-
-```sh
-docker compose up -d
-```
-
-You do not need to rebuild or create another admin account for an unchanged project.
-
-Stop and remove this project's containers with:
-
-```sh
-docker compose down
-```
-
-SQLite is stored at `/data/db.sqlite3` inside the container, backed by the
-`sqlite_data` named volume. Ordinary `docker compose down` preserves it.
-**`docker compose down -v` deletes the volume, including your database and admin account.**
-Local and Docker databases are separate; an account created locally is not
-automatically available in Docker.
-
-### After pulling project updates
-
-The image contains a copy of the code and compiled CSS; local edits are not
-live-mounted. Rebuild after changing code, templates, CSS or dependencies. For
-updates that can include migrations:
-
-```sh
-git pull --ff-only
-docker compose down
-docker compose build
-docker compose run --rm web python manage.py migrate
-docker compose up -d
-```
-
-For local template/CSS edits without database changes, use
-`docker compose up -d --build`. No host-side `npm` command is required for Docker.
-
-### Troubleshooting startup
-
-```sh
-docker compose ps -a
-docker compose logs --tail=80 web
-```
-
-If port 8000 is occupied, stop the other server first. If Docker reports a
-credential-helper error on macOS, check the Keychain prompt for Docker's credential
-helper and retry the build after allowing the expected request.
-
-During development, OrbStack port forwarding once returned connection resets while
-Django worked inside the container. Updating and restarting OrbStack restored
-access. This is a troubleshooting observation, not a required setup step; restarting
-the engine affects its other running containers too.
+Open the same catalog URL. Optional admin account:
+`uv run --locked python manage.py createsuperuser`.
+Stop with Ctrl+C; restart with the `runserver` command.
+For CSS changes, run `npm run watch:css` in a second terminal.
+Python is pinned to 3.14.7; Django to 6.1.1. Dependencies have lockfiles.
 
 ## Demo data
 
-I entered the demo catalog through Django admin and exported it with Django's
-`dumpdata` command to `catalog/fixtures/catalog/demo_catalog.json`. It contains:
+The setup commands load [catalog/demo_catalog.json](catalog/fixtures/catalog/demo_catalog.json):
+**5 categories, 12 tags, 20 products and 62 product–tag associations**.
+I entered the sample catalog through Django admin, then exported it using
+`dumpdata` so reviewers can reproduce the same dataset.
 
-- 5 categories, 12 tags and 20 products.
-- 62 product/tag associations and each product's category.
-- The original creation and update timestamps.
+Load once into a freshly migrated database. Reloading can overwrite records with
+matching IDs; it is not needed on restart. The fixture contains no admin account.
+Local SQLite and the Docker volume are separate databases.
 
-The fixture includes only catalog records, with no users, credentials, sessions or
-admin history. `migrate` creates the schema; it does not load demo records.
-`loaddata` restores the records and their original timestamps. Create your own
-admin account with `createsuperuser` as shown in the setup instructions.
+## Features and design
 
-If you already completed setup with an empty catalog, load the fixture explicitly:
+- Case-insensitive **description-only** search, combined with category and tags.
+- Match **all** or **any** selected tags; no duplicate products.
+- Explicit GET submission, shareable URLs, Clear filters and 10 results per page.
+- Validation errors, empty results, full descriptions and native Django admin.
 
-```sh
-# Local database
-uv run --locked python manage.py loaddata catalog/demo_catalog.json
+See [system design](docs/system-design.md) for requirements, design decisions,
+query behavior, data flow and ERD.
 
-# Or the separate Docker database (rebuild first if the image predates the fixture)
-docker compose run --rm web python manage.py loaddata catalog/demo_catalog.json
-```
+## Test
 
-Use the command for your chosen setup route. After loading, open `/admin/` and
-check the Categories, Tags and Products lists. Local and Docker databases do not
-share data.
-
-Load the fixture into a freshly migrated, empty catalog for the expected counts.
-Do not reload it on every startup or project update: it can overwrite fields and
-tag selections for records with matching primary keys, and it does not remove
-unrelated records. It is a demo restoration step, not a general merge/import tool.
-Back up an existing database before intentionally reloading it.
-
-## Checks
-
-Build the CSS before Django checks on a fresh checkout:
+After local setup:
 
 ```sh
-npm ci
-npm run build:css
-uv run --locked python manage.py findstatic css/app.css
+uv run --locked python manage.py test
 uv run --locked python manage.py check
 uv run --locked python manage.py makemigrations --check --dry-run
-uv run --locked python manage.py test
 uv run --locked ruff check .
 uv run --locked ruff format --check .
 ```
 
-CI runs on pull requests targeting `main`. It installs Node.js 26.7.0, runs
-`npm ci` and builds CSS before the Django checks. It also validates the Compose
-configuration and builds the Docker image.
-The current 41 tests cover models and two focused admin workflows: product creation
-with category/tags and stable product-list query counts as product count increases.
+Expected: **67 tests pass**, no system-check issues or migration changes, and Ruff passes.
+To run Django tests in Docker: `docker compose run --rm web python manage.py test`.
+The Docker runtime image does not include Ruff.
 
-## CSS source and output
+With demo data loaded, use **Clear filters** before each case, enter the combination,
+and press **Search**. “None selected” means leave the category unselected.
 
-- `assets/css/input.css`: Tailwind entry stylesheet.
-- `templates/`: Django templates whose class names are scanned during the build.
-- `static/css/app.css`: generated CSS, excluded from Git and the Docker build context.
-- `package.json` and `package-lock.json`: committed build scripts and locked frontend dependencies.
+| Keyword | Category | Tags | Match | Expected |
+| --- | --- | --- | --- | --- |
+| `CoUpLiNg` | None selected | None | All | 2 products |
+| Blank | None selected | Commercial + Indoor | All | 5 products |
+| Blank | None selected | Commercial + Indoor | Any | 14 products; Next shows 11–14 |
+| `conduit` | Conduit | Commercial + Indoor | All | 1: 3/4-inch EMT Conduit |
+| Blank | Lighting | Copper | All | 0 products; empty state |
 
-Django serves the compiled file at `/static/css/app.css` during local development.
-`templates/base.html` links to it, but no catalog view renders that template yet;
-the built-in admin retains its own styles. Use `findstatic` above to check discovery
-and open http://127.0.0.1:8000/static/css/app.css with the server running to inspect
-the served file.
+[More test URLs and expected results](docs/testing.md).
+CI checks Django, migrations, tests, Ruff, CSS build, Compose and Docker build on PRs.
 
-## Verification status
+## AI assistance
 
-The demo fixture was loaded into a fresh local SQLite database after applying all
-migrations. All 37 records and 62 product/tag associations were verified, including
-an exact comparison of exported fields, IDs, relationships and timestamps. The
-local database was also rebuilt using this workflow. Fixture restoration inside
-Docker has not yet been verified.
+I used Codex throughout development for planning, explanations, code assistance
+and review. I defined the intended behavior, supplied project context and sample
+data, and revised the work through feedback and verification.
 
-Local uv development and Docker via OrbStack were exercised on macOS with Apple
-silicon. The Tailwind changes passed a local locked npm install, CSS build, Ruff
-and Django checks, plus a Docker build and CSS discovery/HTTP check (200).
-The initial backend/Docker CI passed on Ubuntu; the updated CSS workflow still
-needs a GitHub Actions run. The Windows instructions follow the
-linked official installation guides but have not been tested on a Windows machine;
-Docker Desktop on macOS has not been separately verified.
+- **Planning:** scope discussions and sample material research.
+- **Models and model tests:** I implemented
+  [`catalog/models/`](catalog/models/) and the model test cases in
+  [`catalog/tests/models/`](catalog/tests/models/), using AI explanations and
+  examples as learning references. I worked through the concepts and reasoning,
+  then applied them to the project's requirements in my own implementation.
+- **Search queries:** I wrote the complete
+  [`search_products`](catalog/search/queries.py) function, then used AI review
+  suggestions to revise it.
+- **Query tests:** for [`test_queries.py`](catalog/tests/search/test_queries.py),
+  I directed AI-assisted tests to use my sample catalog and existing test style.
+- **Templates and styling:** initial template examples and styling assistance.
+  I wrote the functional HTML skeleton before developing the styled interface.
+- **Documentation and demos:** AI-written drafts based on my project context,
+  decisions and revision feedback.
+
+I remain responsible for the submitted code, its verification, and explaining
+the implementation and trade-offs.
