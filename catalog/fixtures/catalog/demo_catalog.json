@@ -1,0 +1,477 @@
+[
+{
+  "model": "catalog.category",
+  "pk": 1,
+  "fields": {
+    "name": "Wire & Cable",
+    "created_at": "2026-09-21T22:22:26.701Z",
+    "updated_at": "2026-09-21T22:22:26.701Z"
+  }
+},
+{
+  "model": "catalog.category",
+  "pk": 2,
+  "fields": {
+    "name": "Conduit",
+    "created_at": "2026-09-21T22:22:30.745Z",
+    "updated_at": "2026-09-21T22:22:30.745Z"
+  }
+},
+{
+  "model": "catalog.category",
+  "pk": 3,
+  "fields": {
+    "name": "Fittings & Connectors",
+    "created_at": "2026-09-21T22:22:35.658Z",
+    "updated_at": "2026-09-21T22:22:35.659Z"
+  }
+},
+{
+  "model": "catalog.category",
+  "pk": 4,
+  "fields": {
+    "name": "Electrical Distribution",
+    "created_at": "2026-09-21T22:22:40.097Z",
+    "updated_at": "2026-09-21T22:22:40.097Z"
+  }
+},
+{
+  "model": "catalog.category",
+  "pk": 5,
+  "fields": {
+    "name": "Lighting",
+    "created_at": "2026-09-21T22:22:44.110Z",
+    "updated_at": "2026-09-21T22:22:44.110Z"
+  }
+},
+{
+  "model": "catalog.tag",
+  "pk": 1,
+  "fields": {
+    "name": "Commercial",
+    "created_at": "2026-09-21T22:26:12.978Z",
+    "updated_at": "2026-09-21T22:26:12.978Z"
+  }
+},
+{
+  "model": "catalog.tag",
+  "pk": 2,
+  "fields": {
+    "name": "Industrial",
+    "created_at": "2026-09-21T22:26:20.218Z",
+    "updated_at": "2026-09-21T22:26:20.218Z"
+  }
+},
+{
+  "model": "catalog.tag",
+  "pk": 3,
+  "fields": {
+    "name": "Indoor",
+    "created_at": "2026-09-21T22:26:23.616Z",
+    "updated_at": "2026-09-21T22:26:23.616Z"
+  }
+},
+{
+  "model": "catalog.tag",
+  "pk": 4,
+  "fields": {
+    "name": "Outdoor",
+    "created_at": "2026-09-21T22:26:32.610Z",
+    "updated_at": "2026-09-21T22:27:55.653Z"
+  }
+},
+{
+  "model": "catalog.tag",
+  "pk": 5,
+  "fields": {
+    "name": "Copper",
+    "created_at": "2026-09-21T22:26:36.047Z",
+    "updated_at": "2026-09-21T22:26:36.047Z"
+  }
+},
+{
+  "model": "catalog.tag",
+  "pk": 6,
+  "fields": {
+    "name": "Cut to Length",
+    "created_at": "2026-09-21T22:26:42.232Z",
+    "updated_at": "2026-09-21T22:26:42.232Z"
+  }
+},
+{
+  "model": "catalog.tag",
+  "pk": 7,
+  "fields": {
+    "name": "Prefab Eligible",
+    "created_at": "2026-09-21T22:26:49.376Z",
+    "updated_at": "2026-09-21T22:26:49.376Z"
+  }
+},
+{
+  "model": "catalog.tag",
+  "pk": 8,
+  "fields": {
+    "name": "Van Stock",
+    "created_at": "2026-09-21T22:26:55.095Z",
+    "updated_at": "2026-09-21T22:26:55.095Z"
+  }
+},
+{
+  "model": "catalog.tag",
+  "pk": 9,
+  "fields": {
+    "name": "High Value",
+    "created_at": "2026-09-21T22:27:01.004Z",
+    "updated_at": "2026-09-21T22:27:01.004Z"
+  }
+},
+{
+  "model": "catalog.tag",
+  "pk": 10,
+  "fields": {
+    "name": "Long Lead",
+    "created_at": "2026-09-21T22:27:05.908Z",
+    "updated_at": "2026-09-21T22:27:05.908Z"
+  }
+},
+{
+  "model": "catalog.tag",
+  "pk": 11,
+  "fields": {
+    "name": "Fragile",
+    "created_at": "2026-09-21T22:27:09.555Z",
+    "updated_at": "2026-09-21T22:27:09.555Z"
+  }
+},
+{
+  "model": "catalog.tag",
+  "pk": 12,
+  "fields": {
+    "name": "Energy Efficient",
+    "created_at": "2026-09-21T22:27:14.945Z",
+    "updated_at": "2026-09-21T22:27:14.945Z"
+  }
+},
+{
+  "model": "catalog.product",
+  "pk": 1,
+  "fields": {
+    "name": "THHN Copper Wire – 12 AWG",
+    "description": "12 AWG copper wire for commercial branch-circuit wiring, prepared to the requested length.",
+    "created_at": "2026-09-21T23:03:18.214Z",
+    "updated_at": "2026-09-21T23:03:18.214Z",
+    "category": 1,
+    "tags": [
+      1,
+      5,
+      6
+    ]
+  }
+},
+{
+  "model": "catalog.product",
+  "pk": 2,
+  "fields": {
+    "name": "THHN Copper Wire – 10 AWG",
+    "description": "10 AWG copper wire for industrial electrical wiring, prepared to the requested length.",
+    "created_at": "2026-09-22T03:28:34.614Z",
+    "updated_at": "2026-09-22T03:28:34.614Z",
+    "category": 1,
+    "tags": [
+      5,
+      6,
+      2
+    ]
+  }
+},
+{
+  "model": "catalog.product",
+  "pk": 3,
+  "fields": {
+    "name": "MC Cable – 12/2",
+    "description": "12/2 metal-clad cable for indoor commercial wiring and shop-prepared cable assemblies.",
+    "created_at": "2026-09-22T03:29:25.957Z",
+    "updated_at": "2026-09-22T03:29:25.957Z",
+    "category": 1,
+    "tags": [
+      1,
+      3,
+      7
+    ]
+  }
+},
+{
+  "model": "catalog.product",
+  "pk": 4,
+  "fields": {
+    "name": "Copper Grounding Wire – 6 AWG",
+    "description": "6 AWG bare copper wire for grounding and bonding in industrial electrical installations.",
+    "created_at": "2026-09-22T03:31:15.699Z",
+    "updated_at": "2026-09-22T03:31:15.699Z",
+    "category": 1,
+    "tags": [
+      5,
+      6,
+      2
+    ]
+  }
+},
+{
+  "model": "catalog.product",
+  "pk": 5,
+  "fields": {
+    "name": "3/4-inch EMT Conduit",
+    "description": "3/4-inch EMT conduit for indoor commercial wire routing and prefabricated raceway sections.",
+    "created_at": "2026-09-22T03:31:58.357Z",
+    "updated_at": "2026-09-22T03:31:58.357Z",
+    "category": 2,
+    "tags": [
+      1,
+      3,
+      7
+    ]
+  }
+},
+{
+  "model": "catalog.product",
+  "pk": 6,
+  "fields": {
+    "name": "1-inch EMT Conduit",
+    "description": "1-inch EMT conduit for indoor industrial wire routing and shop-prepared raceway sections.",
+    "created_at": "2026-09-22T03:33:04.410Z",
+    "updated_at": "2026-09-22T03:33:04.410Z",
+    "category": 2,
+    "tags": [
+      3,
+      2,
+      7
+    ]
+  }
+},
+{
+  "model": "catalog.product",
+  "pk": 7,
+  "fields": {
+    "name": "3/4-inch PVC Conduit",
+    "description": "3/4-inch PVC conduit for an outdoor commercial electrical raceway in this demo.",
+    "created_at": "2026-09-22T03:33:56.818Z",
+    "updated_at": "2026-09-22T03:33:56.818Z",
+    "category": 2,
+    "tags": [
+      1,
+      4
+    ]
+  }
+},
+{
+  "model": "catalog.product",
+  "pk": 8,
+  "fields": {
+    "name": "1-inch Rigid Steel Conduit",
+    "description": "1-inch rigid steel conduit for industrial raceways and off-site assembly preparation.",
+    "created_at": "2026-09-22T03:34:42.209Z",
+    "updated_at": "2026-09-22T03:34:42.209Z",
+    "category": 2,
+    "tags": [
+      2,
+      7
+    ]
+  }
+},
+{
+  "model": "catalog.product",
+  "pk": 9,
+  "fields": {
+    "name": "3/4-inch EMT Coupling",
+    "description": "3/4-inch EMT coupling for joining conduit sections in indoor commercial raceways.",
+    "created_at": "2026-09-22T03:35:31.861Z",
+    "updated_at": "2026-09-22T03:35:31.861Z",
+    "category": 3,
+    "tags": [
+      1,
+      3,
+      8
+    ]
+  }
+},
+{
+  "model": "catalog.product",
+  "pk": 10,
+  "fields": {
+    "name": "3/4-inch EMT Connector",
+    "description": "3/4-inch EMT connector for connecting conduit to an electrical box in indoor commercial work.",
+    "created_at": "2026-09-22T03:36:12.529Z",
+    "updated_at": "2026-09-22T03:36:12.529Z",
+    "category": 3,
+    "tags": [
+      1,
+      3,
+      8
+    ]
+  }
+},
+{
+  "model": "catalog.product",
+  "pk": 11,
+  "fields": {
+    "name": "MC Cable Connector",
+    "description": "Connector for terminating metal-clad cable at a box in shop-prepared commercial assemblies.",
+    "created_at": "2026-09-22T03:36:53.966Z",
+    "updated_at": "2026-09-22T03:36:53.966Z",
+    "category": 3,
+    "tags": [
+      1,
+      7,
+      8
+    ]
+  }
+},
+{
+  "model": "catalog.product",
+  "pk": 12,
+  "fields": {
+    "name": "1-inch Rigid Conduit Coupling",
+    "description": "1-inch threaded coupling for joining rigid conduit in industrial raceway assemblies.",
+    "created_at": "2026-09-22T03:37:24.677Z",
+    "updated_at": "2026-09-22T03:37:24.677Z",
+    "category": 3,
+    "tags": [
+      2,
+      7,
+      8
+    ]
+  }
+},
+{
+  "model": "catalog.product",
+  "pk": 13,
+  "fields": {
+    "name": "400A Panelboard",
+    "description": "400A panelboard for commercial power distribution, planned as a major equipment purchase.",
+    "created_at": "2026-09-22T03:38:13.792Z",
+    "updated_at": "2026-09-22T03:38:13.792Z",
+    "category": 4,
+    "tags": [
+      1,
+      9,
+      10
+    ]
+  }
+},
+{
+  "model": "catalog.product",
+  "pk": 14,
+  "fields": {
+    "name": "Switchgear Distribution Section",
+    "description": "Switchgear section for industrial power distribution, coordinated with the project equipment schedule.",
+    "created_at": "2026-09-22T03:39:02.536Z",
+    "updated_at": "2026-09-22T03:39:02.536Z",
+    "category": 4,
+    "tags": [
+      9,
+      2,
+      10
+    ]
+  }
+},
+{
+  "model": "catalog.product",
+  "pk": 15,
+  "fields": {
+    "name": "60A Disconnect Switch",
+    "description": "60A disconnect switch for local equipment isolation in an indoor industrial installation.",
+    "created_at": "2026-09-22T03:39:33.326Z",
+    "updated_at": "2026-09-22T03:39:33.326Z",
+    "category": 4,
+    "tags": [
+      3,
+      2
+    ]
+  }
+},
+{
+  "model": "catalog.product",
+  "pk": 16,
+  "fields": {
+    "name": "Industrial Control Panel Assembly",
+    "description": "Shop-built control panel assembly for industrial equipment controls and coordinated project delivery.",
+    "created_at": "2026-09-22T03:40:12.950Z",
+    "updated_at": "2026-09-22T03:40:12.950Z",
+    "category": 4,
+    "tags": [
+      9,
+      2,
+      10,
+      7
+    ]
+  }
+},
+{
+  "model": "catalog.product",
+  "pk": 17,
+  "fields": {
+    "name": "LED High-Bay Fixture",
+    "description": "LED high-bay lighting fixture for indoor industrial work areas with high ceilings.",
+    "created_at": "2026-09-22T03:40:59.961Z",
+    "updated_at": "2026-09-22T03:40:59.961Z",
+    "category": 5,
+    "tags": [
+      12,
+      11,
+      3,
+      2
+    ]
+  }
+},
+{
+  "model": "catalog.product",
+  "pk": 18,
+  "fields": {
+    "name": "LED Wall Pack",
+    "description": "LED wall-pack lighting fixture for an outdoor commercial building entrance.",
+    "created_at": "2026-09-22T03:41:38.515Z",
+    "updated_at": "2026-09-22T03:41:38.515Z",
+    "category": 5,
+    "tags": [
+      1,
+      12,
+      11,
+      4
+    ]
+  }
+},
+{
+  "model": "catalog.product",
+  "pk": 19,
+  "fields": {
+    "name": "LED Flat Panel Fixture",
+    "description": "LED flat-panel lighting fixture for indoor commercial office areas.",
+    "created_at": "2026-09-22T03:42:21.021Z",
+    "updated_at": "2026-09-22T03:42:21.021Z",
+    "category": 5,
+    "tags": [
+      1,
+      12,
+      11,
+      3
+    ]
+  }
+},
+{
+  "model": "catalog.product",
+  "pk": 20,
+  "fields": {
+    "name": "LED Strip Fixture",
+    "description": "LED strip lighting fixture for indoor industrial service areas.",
+    "created_at": "2026-09-22T03:43:20.625Z",
+    "updated_at": "2026-09-22T03:43:20.625Z",
+    "category": 5,
+    "tags": [
+      12,
+      11,
+      3,
+      2
+    ]
+  }
+}
+]

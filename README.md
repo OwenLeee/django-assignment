@@ -8,8 +8,8 @@ Choose one route:
 - **Docker review:** install and start Docker with Compose; Python and uv are provided inside the image.
 
 Both routes open the app at http://127.0.0.1:8000/admin/. Run only one server on
-port 8000 at a time. This project currently provides the Django scaffold and admin;
-catalog features and demo data are not implemented yet.
+port 8000 at a time. Catalog models, native admin management and a demo fixture
+are available. The public product search page is not implemented yet.
 
 ### Get the project (first time only)
 
@@ -62,6 +62,7 @@ uv sync --locked --dev
 npm ci
 npm run build:css
 uv run --locked python manage.py migrate
+uv run --locked python manage.py loaddata catalog/demo_catalog.json
 uv run --locked python manage.py createsuperuser
 uv run --locked python manage.py runserver
 ```
@@ -71,6 +72,9 @@ is not displayed in the terminal. Log in at http://127.0.0.1:8000/admin/.
 
 Python 3.14.7 is pinned in `.python-version`; dependencies are locked in `uv.lock`.
 The local database is `db.sqlite3` in the repository directory.
+
+The `loaddata` step loads the sample catalog described under [Demo data](#demo-data).
+Skip it if you want an empty catalog; create your admin account separately either way.
 
 ### Start again next time
 
@@ -147,6 +151,7 @@ Stop any local Django server using port 8000, then run:
 ```sh
 docker compose build
 docker compose run --rm web python manage.py migrate
+docker compose run --rm web python manage.py loaddata catalog/demo_catalog.json
 docker compose run --rm web python manage.py createsuperuser
 docker compose up -d
 ```
@@ -210,6 +215,40 @@ Django worked inside the container. Updating and restarting OrbStack restored
 access. This is a troubleshooting observation, not a required setup step; restarting
 the engine affects its other running containers too.
 
+## Demo data
+
+I entered the demo catalog through Django admin and exported it with Django's
+`dumpdata` command to `catalog/fixtures/catalog/demo_catalog.json`. It contains:
+
+- 5 categories, 12 tags and 20 products.
+- 62 product/tag associations and each product's category.
+- The original creation and update timestamps.
+
+The fixture includes only catalog records, with no users, credentials, sessions or
+admin history. `migrate` creates the schema; it does not load demo records.
+`loaddata` restores the records and their original timestamps. Create your own
+admin account with `createsuperuser` as shown in the setup instructions.
+
+If you already completed setup with an empty catalog, load the fixture explicitly:
+
+```sh
+# Local database
+uv run --locked python manage.py loaddata catalog/demo_catalog.json
+
+# Or the separate Docker database (rebuild first if the image predates the fixture)
+docker compose run --rm web python manage.py loaddata catalog/demo_catalog.json
+```
+
+Use the command for your chosen setup route. After loading, open `/admin/` and
+check the Categories, Tags and Products lists. Local and Docker databases do not
+share data.
+
+Load the fixture into a freshly migrated, empty catalog for the expected counts.
+Do not reload it on every startup or project update: it can overwrite fields and
+tag selections for records with matching primary keys, and it does not remove
+unrelated records. It is a demo restoration step, not a general merge/import tool.
+Back up an existing database before intentionally reloading it.
+
 ## Checks
 
 Build the CSS before Django checks on a fresh checkout:
@@ -228,7 +267,8 @@ uv run --locked ruff format --check .
 CI runs on pull requests targeting `main`. It installs Node.js 26.7.0, runs
 `npm ci` and builds CSS before the Django checks. It also validates the Compose
 configuration and builds the Docker image.
-Feature tests will be added alongside implementation; currently there are no tests.
+The current 41 tests cover models and two focused admin workflows: product creation
+with category/tags and stable product-list query counts as product count increases.
 
 ## CSS source and output
 
@@ -244,6 +284,12 @@ and open http://127.0.0.1:8000/static/css/app.css with the server running to ins
 the served file.
 
 ## Verification status
+
+The demo fixture was loaded into a fresh local SQLite database after applying all
+migrations. All 37 records and 62 product/tag associations were verified, including
+an exact comparison of exported fields, IDs, relationships and timestamps. The
+local database was also rebuilt using this workflow. Fixture restoration inside
+Docker has not yet been verified.
 
 Local uv development and Docker via OrbStack were exercised on macOS with Apple
 silicon. The Tailwind changes passed a local locked npm install, CSS build, Ruff
