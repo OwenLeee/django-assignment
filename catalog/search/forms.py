@@ -34,3 +34,11 @@ class ProductSearchForm(forms.Form):
             "invalid_choice": "The selected category is no longer available.",
         },
     )
+
+    def clean(self):
+        cleaned_data = super().clean()
+        if hasattr(self.data, "getlist"):
+            category_list = self.data.getlist("category")
+            if len(category_list) > 1:
+                self.add_error("category", "Select only one category.")
+        return cleaned_data

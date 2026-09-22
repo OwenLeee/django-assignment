@@ -1,3 +1,4 @@
+from django.http import QueryDict
 from django.test import SimpleTestCase, TestCase
 
 from catalog.search.forms import ProductSearchForm
@@ -105,3 +106,18 @@ class CategoryFieldTests(TestCase):
         self.assertIn(
             "The selected category is no longer available.", form.errors["category"]
         )
+
+    def test_repeated_category_is_rejected(self):
+        category1 = create_category(name="Wire & Cable")
+        category2 = create_category(name="Conduit")
+        cases = [
+            QueryDict(f"category={category1.id}&category={category1.id}"),
+            QueryDict(f"category={category1.id}&category={category2.id}"),
+        ]
+
+        for case in cases:
+            with self.subTest(categories=case.getlist("category")):
+                form = ProductSearchForm(data=case)
+                self.assertFalse(form.is_valid())
+                self.assertIn("category", form.errors)
+                self.assertIn("Select only one category.", form.errors["category"])
